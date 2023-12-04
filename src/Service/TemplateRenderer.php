@@ -7,10 +7,17 @@ use Aatis\TemplateRenderer\Interface\TemplateRendererInterface;
 
 class TemplateRenderer implements TemplateRendererInterface
 {
-    public function __construct(
-        // ...
-    )
+    /**
+     * @var TemplateRendererInterface[] 
+     */
+    private array $renderers = [];
+
+    /**
+     * @param TemplateRendererInterface[] $additionnalRenderers
+     */
+    public function __construct(private array $additionnalRenderers = [])
     {
+        $this->registerRenderer(new PhpRenderer(), new TwigRenderer(), ...$additionnalRenderers);
     }
 
     public function render(string $templatePath, array $data = []): void
@@ -22,5 +29,9 @@ class TemplateRenderer implements TemplateRendererInterface
         ) {
             throw new FileNotFoundException(sprintf('Template "%s" not found', $templatePath));
         }
+    }
+
+    private function registerRenderer(...$renderers): void
+    {
     }
 }
