@@ -3,9 +3,8 @@
 namespace Aatis\TemplateRenderer\Service;
 
 use Aatis\TemplateRenderer\Enum\TemplateFileExtension;
-use Aatis\TemplateRenderer\Interface\TemplateRendererInterface;
 
-class PhpRenderer implements TemplateRendererInterface
+class PhpRenderer extends AbstractTemplateRenderer
 {
     public const EXTENSION = TemplateFileExtension::PHP;
 

@@ -2,8 +2,9 @@
 
 namespace Aatis\TemplateRenderer\Enum;
 
-enum TemplateFileExtension
+enum TemplateFileExtension: string
 {
-    public const PHP = '.tpl.php';
-    public const TWIG = '.html.twig';
+    case PHP = '.tpl.php';
+    case TWIG = '.html.twig';
+    case DEFAULT = 'The extension must be overridden in the child class.';
 }
