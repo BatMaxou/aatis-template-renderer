@@ -4,8 +4,6 @@ namespace Aatis\TemplateRenderer\Interface;
 
 interface TemplateRendererInterface
 {
-    public const EXTENSION = '';
-
     /**
      * @param array<string, mixed> $data
      */
