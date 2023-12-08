@@ -2,11 +2,11 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
-use Aatis\TemplateRenderer\Interface\TemplateRendererInterface;
+use Aatis\TemplateRenderer\Enum\TemplateFileExtension;
 
-class PhpRenderer implements TemplateRendererInterface
+class PhpRenderer extends AbstractTemplateRenderer
 {
-    public const EXTENSION = '.tpl.php';
+    public const EXTENSION = TemplateFileExtension::PHP;
 
     public function render(string $template, array $vars = []): void
     {
