@@ -2,7 +2,7 @@
 
 namespace Aatis\TemplateRenderer\Enum;
 
-enum TemplateFileExtension: string
+enum TemplateFileExtensionEnum: string
 {
     case PHP = '.tpl.php';
     case TWIG = '.html.twig';
