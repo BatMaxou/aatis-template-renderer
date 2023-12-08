@@ -2,6 +2,8 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
+use Aatis\DependencyInjection\Entity\Service;
+use Aatis\DependencyInjection\Service\ServiceInstanciator;
 use Aatis\TemplateRenderer\Exception\ExtensionNotSupported;
 use Aatis\TemplateRenderer\Exception\FileNotFoundException;
 use Aatis\TemplateRenderer\Interface\TemplateRendererInterface;
@@ -10,14 +12,38 @@ use Aatis\TemplateRenderer\Interface\TypedTemplateRendererInterface;
 class TemplateRenderer implements TemplateRendererInterface
 {
     /**
-     * @var TypedTemplateRendererInterface[]
+     * @var array<string, TypedTemplateRendererInterface>
      */
     private array $renderers = [];
 
+    /**
+     * @var TypedTemplateRendererInterface[]
+     */
+    private array $extraRenderers = [];
+
+    /**
+     * @param array<class-string> $extraRenderers
+     */
     public function __construct(
-        private readonly string $_document_root
+        private readonly string $_document_root,
+        private readonly PhpRenderer $phpRenderer,
+        private readonly TwigRenderer $twigRenderer,
+        private readonly ServiceInstanciator $serviceInstanciator,
+        array $extraRenderers = []
     ) {
-        $this->registerRenderer(new PhpRenderer(), new TwigRenderer($_document_root));
+        foreach ($extraRenderers as $extraRenderer) {
+            if (class_exists($extraRenderer)) {
+                $renderer = $this->serviceInstanciator->instanciate(new Service($extraRenderer));
+
+                if (!$renderer instanceof TypedTemplateRendererInterface) {
+                    throw new \InvalidArgumentException(sprintf('Renderer "%s" must implement "%s"', $extraRenderer, TypedTemplateRendererInterface::class));
+                }
+
+                $this->extraRenderers[] = $renderer;
+            }
+        }
+
+        $this->registerRenderers($this->phpRenderer, $this->twigRenderer, ...$this->extraRenderers);
     }
 
     public function render(string $templatePath, array $vars = []): void
@@ -47,7 +73,7 @@ class TemplateRenderer implements TemplateRendererInterface
     /**
      * @param TypedTemplateRendererInterface $renderers
      */
-    public function registerRenderer(...$renderers): void
+    public function registerRenderers(...$renderers): void
     {
         foreach ($renderers as $renderer) {
             $this->renderers[$renderer->getExtension()] = $renderer;
