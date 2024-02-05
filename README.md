@@ -12,20 +12,9 @@ composer require aatis/template-renderer
 
 ## Usage
 
-### Requirements
-
-First, add the template renderer into your container.
-
-```yaml
-# In config/services.yaml file :
-
-include_services:
-    Namespace\Of\The\Template\Renderer:
-```
-
 ### Basic usage
 
-Call **render()** method with template path and data array.
+Call `render()` method with template path and data array.
 
 ```php
 $templateRenderer = new TemplateRenderer();
@@ -36,11 +25,11 @@ $templateRenderer->render('path/to/template', [
 
 ### Custom Template Renderer
 
-By default, this template renderer supports **.tpl.php** and **.html.twig** files.
+By default, this template renderer supports `.tpl.php` and `.html.twig` files.
 
 You can add your own template renderer by creating:
 - an enum with the extension you want to target with your custom renderers.
-- a class that extends **AbstractTemplateRenderer**.
+- a class that extends `AbstractTemplateRenderer`.
 
 ```php
 enum ExtraTemplateFileExtension: string
@@ -50,8 +39,8 @@ enum ExtraTemplateFileExtension: string
 ```
 
 This Custom Template Renderer must contains: 
-- **EXTENSION** constant calling the case of the enum corresponding to the target extension.
-- **render()** method that will be called by the base template renderer.
+- `EXTENSION` constant calling the case of the enum corresponding to the target extension.
+- `render()` method that will be called by the base template renderer.
 
 ```php
 class ExtraRenderer extends AbstractTemplateRenderer
@@ -65,14 +54,29 @@ class ExtraRenderer extends AbstractTemplateRenderer
 }
 ```
 
-Then, inform the template renderer that you want to use your custom renderer.
+## With Aatis Framework
+
+### Requirements
+
+Add the `TemplateRenderer` service to the `Container`.
+
+```yaml
+# In config/services.yaml file :
+
+include_services:
+    - 'Aatis\TemplateRenderer\Service\TemplateRenderer'
+```
+
+### Custom Template Renderer
+
+If you want to add other template renderer, you can do the following : 
 
 ```yaml
 # In config/services.yaml file :
 
 services:
-    Namespace\Of\The\Template\Renderer:
+    Aatis\TemplateRenderer\Service\TemplateRenderer:
         arguments:
             extraRenderers:
-                - Namespace\Of\Your\Custom\Template\Renderer
+                - 'Namespace\Of\Your\Custom\Template\Renderer'
 ```
