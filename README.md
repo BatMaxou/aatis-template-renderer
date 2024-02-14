@@ -4,6 +4,11 @@
 
 Customizable and easy to use template renderer based on file extension name.
 
+## Advertisement
+
+This package is a part of `Aatis` and can't be used without the following packages :
+- `aatis/dependency-injection` (https://github.com/BatMaxou/aatis-DI)
+
 ## Installation
 
 ```bash
@@ -11,6 +16,17 @@ composer require aatis/template-renderer
 ```
 
 ## Usage
+
+### Requirements
+
+Add the `TemplateRenderer` service into the `Container`.
+
+```yaml
+# In config/services.yaml file :
+
+include_services:
+    - 'Aatis\TemplateRenderer\Service\TemplateRenderer'
+```
 
 ### Basic usage
 
@@ -54,22 +70,7 @@ class ExtraRenderer extends AbstractTemplateRenderer
 }
 ```
 
-## With Aatis Framework
-
-### Requirements
-
-Add the `TemplateRenderer` service to the `Container`.
-
-```yaml
-# In config/services.yaml file :
-
-include_services:
-    - 'Aatis\TemplateRenderer\Service\TemplateRenderer'
-```
-
-### Custom Template Renderer
-
-If you want to add other template renderer, you can do the following : 
+Finally, do not forget to add it into the `TemplateRenderer` service: 
 
 ```yaml
 # In config/services.yaml file :
