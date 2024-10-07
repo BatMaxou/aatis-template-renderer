@@ -26,6 +26,7 @@ class TemplateRenderer implements TemplateRendererInterface
      */
     public function __construct(
         private readonly string $_document_root,
+        private readonly HtmlRenderer $htmlRenderer,
         private readonly PhpRenderer $phpRenderer,
         private readonly TwigRenderer $twigRenderer,
         private readonly ServiceInstanciator $serviceInstanciator,
@@ -43,7 +44,7 @@ class TemplateRenderer implements TemplateRendererInterface
             }
         }
 
-        $this->registerRenderers($this->phpRenderer, $this->twigRenderer, ...$this->extraRenderers);
+        $this->registerRenderers($this->htmlRenderer, $this->phpRenderer, $this->twigRenderer, ...$this->extraRenderers);
     }
 
     public function render(string $templatePath, array $vars = []): string
