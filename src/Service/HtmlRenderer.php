@@ -4,12 +4,12 @@ namespace Aatis\TemplateRenderer\Service;
 
 use Aatis\TemplateRenderer\Enum\TemplateFileExtensionEnum;
 
-class PhpRenderer extends AbstractTemplateRenderer
+class HtmlRenderer extends AbstractTemplateRenderer
 {
-    public const EXTENSION = TemplateFileExtensionEnum::PHP;
+    public const EXTENSION = TemplateFileExtensionEnum::HTML;
 
     public function render(string $template, array $vars = []): string
     {
-        return $this->getTemplateContent($template, $vars);
+        return $this->getTemplateContent($template);
     }
 }

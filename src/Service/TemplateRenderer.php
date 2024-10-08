@@ -26,6 +26,7 @@ class TemplateRenderer implements TemplateRendererInterface
      */
     public function __construct(
         private readonly string $_document_root,
+        private readonly HtmlRenderer $htmlRenderer,
         private readonly PhpRenderer $phpRenderer,
         private readonly TwigRenderer $twigRenderer,
         private readonly ServiceInstanciator $serviceInstanciator,
@@ -43,31 +44,36 @@ class TemplateRenderer implements TemplateRendererInterface
             }
         }
 
-        $this->registerRenderers($this->phpRenderer, $this->twigRenderer, ...$this->extraRenderers);
+        $this->registerRenderers($this->htmlRenderer, $this->phpRenderer, $this->twigRenderer, ...$this->extraRenderers);
     }
 
-    public function render(string $templatePath, array $vars = []): void
+    public function render(string $templatePath, array $vars = []): string
     {
         $vars['documentRoot'] = $this->_document_root;
-        $vars['templatesFolderPath'] = $vars['overrideLocation'] ?? $this->_document_root.'/../templates';
-        $fullTemplatePath = $vars['templatesFolderPath'].$templatePath;
+
+        $overrideLocation = $vars['overrideLocation'] ?? null;
+        if (null !== $overrideLocation && !is_string($overrideLocation)) {
+            throw new \InvalidArgumentException('Override location must be a string');
+        }
+
+        $vars['templatesFolderPath'] = $overrideLocation ?? sprintf('%s/../templates', $this->_document_root);
+        $fullTemplatePath = sprintf('%s%s', $vars['templatesFolderPath'], $templatePath);
 
         if (!file_exists($fullTemplatePath)) {
             throw new FileNotFoundException(sprintf('Template "%s" not found', $templatePath));
         }
 
-        $rendered = false;
-
         foreach ($this->renderers as $extension => $renderer) {
             if (str_ends_with($templatePath, $extension)) {
-                $renderer->render($fullTemplatePath, $vars);
-                $rendered = true;
+                if (!isset($vars['renderer'])) {
+                    $vars['renderer'] = $renderer;
+                }
+
+                return $renderer->render($fullTemplatePath, $vars);
             }
         }
 
-        if (!$rendered) {
-            throw new ExtensionNotSupported(sprintf('Extension template "%s" not supported.', $templatePath));
-        }
+        throw new ExtensionNotSupported(sprintf('Template extension "%s" not supported.', $templatePath));
     }
 
     /**
