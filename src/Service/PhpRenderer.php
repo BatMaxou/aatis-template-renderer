@@ -8,13 +8,8 @@ class PhpRenderer extends AbstractTemplateRenderer
 {
     public const EXTENSION = TemplateFileExtensionEnum::PHP;
 
-    public function render(string $template, array $vars = []): void
+    public function render(string $template, array $vars = []): string
     {
-        if (!isset($vars['renderer'])) {
-            $vars['renderer'] = $this;
-        }
-
-        extract($vars);
-        require_once $template;
+        return $this->getTemplateContent($template, $vars);
     }
 }
