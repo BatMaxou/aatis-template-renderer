@@ -57,7 +57,12 @@ class TemplateRenderer implements TemplateRendererInterface
         }
 
         $vars['templatesFolderPath'] = $overrideLocation ?? sprintf('%s/../templates', $this->_document_root);
-        $fullTemplatePath = sprintf('%s%s', $vars['templatesFolderPath'], $templatePath);
+        $fullTemplatePath = sprintf(
+            '%s%s%s',
+            $vars['templatesFolderPath'],
+            str_starts_with($templatePath, '/') ? '' : '/',
+            $templatePath,
+        );
 
         if (!file_exists($fullTemplatePath)) {
             throw new FileNotFoundException(sprintf('Template "%s" not found', $templatePath));
