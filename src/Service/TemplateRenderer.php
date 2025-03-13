@@ -2,7 +2,7 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
-use Aatis\DependencyInjection\Entity\Service;
+use Aatis\DependencyInjection\Component\Service;
 use Aatis\DependencyInjection\Service\ServiceInstanciator;
 use Aatis\TemplateRenderer\Exception\ExtensionNotSupported;
 use Aatis\TemplateRenderer\Exception\FileNotFoundException;
@@ -30,7 +30,7 @@ class TemplateRenderer implements TemplateRendererInterface
         private readonly PhpRenderer $phpRenderer,
         private readonly TwigRenderer $twigRenderer,
         private readonly ServiceInstanciator $serviceInstanciator,
-        array $extraRenderers = []
+        array $extraRenderers = [],
     ) {
         foreach ($extraRenderers as $extraRenderer) {
             if (class_exists($extraRenderer)) {

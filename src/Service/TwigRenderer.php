@@ -2,9 +2,9 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
+use Aatis\TemplateRenderer\Enum\TemplateFileExtensionEnum;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Aatis\TemplateRenderer\Enum\TemplateFileExtensionEnum;
 
 class TwigRenderer extends AbstractTemplateRenderer
 {
@@ -15,7 +15,7 @@ class TwigRenderer extends AbstractTemplateRenderer
     private Environment $twigEnvironment;
 
     public function __construct(
-        private readonly string $_document_root
+        private readonly string $_document_root,
     ) {
         $this->twigEnvironmentPath = sprintf('%s/../templates', $this->_document_root);
         $this->twigEnvironment = new Environment(new FilesystemLoader($this->twigEnvironmentPath));
