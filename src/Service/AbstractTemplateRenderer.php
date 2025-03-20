@@ -2,25 +2,24 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
-use Aatis\TemplateRenderer\Enum\TemplateFileExtensionEnum;
 use Aatis\TemplateRenderer\Interface\TypedTemplateRendererInterface;
 
 abstract class AbstractTemplateRenderer implements TypedTemplateRendererInterface
 {
-    public const EXTENSION = TemplateFileExtensionEnum::DEFAULT;
+    protected const EXTENSION = '';
 
     /**
      * @param array<string, mixed> $vars
      */
     abstract public function render(string $template, array $vars = []): string;
 
-    public function getExtension(): string
+    public static function getExtension(): string
     {
-        if (TemplateFileExtensionEnum::DEFAULT === static::EXTENSION) {
-            throw new \RuntimeException('Extension is set to default, it must be overridden in child class');
+        if (!is_string(static::EXTENSION) || empty(static::EXTENSION)) {
+            throw new \RuntimeException('Extension is not set, it must be overridden in child class');
         }
 
-        return static::EXTENSION->value;
+        return static::EXTENSION;
     }
 
     /**

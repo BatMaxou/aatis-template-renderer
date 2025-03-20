@@ -2,49 +2,46 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
+use Aatis\DependencyInjection\Attribute\AsDefaultTaggedService;
 use Aatis\DependencyInjection\Component\Service;
-use Aatis\DependencyInjection\Service\ServiceInstanciator;
+use Aatis\DependencyInjection\Enum\ServiceTagOption;
+use Aatis\DependencyInjection\Interface\ServiceSubscriberInterface;
+use Aatis\DependencyInjection\Trait\ServiceSubscriberTrait;
+use Aatis\Tag\Interface\TagBuilderInterface;
 use Aatis\TemplateRenderer\Exception\ExtensionNotSupported;
 use Aatis\TemplateRenderer\Exception\FileNotFoundException;
 use Aatis\TemplateRenderer\Interface\TemplateRendererInterface;
 use Aatis\TemplateRenderer\Interface\TypedTemplateRendererInterface;
+use Psr\Container\ContainerInterface;
 
-class TemplateRenderer implements TemplateRendererInterface
+/**
+ * @template TypedTemplateRendererService of Service<TypedTemplateRendererInterface>
+ */
+#[AsDefaultTaggedService([TemplateRendererInterface::class])]
+class TemplateRenderer implements TemplateRendererInterface, ServiceSubscriberInterface
 {
     /**
-     * @var array<string, TypedTemplateRendererInterface>
+     * @use ServiceSubscriberTrait<TypedTemplateRendererService, TypedTemplateRendererService, array{
+     *  file: string,
+     * }>
      */
-    private array $renderers = [];
+    use ServiceSubscriberTrait {
+        __construct as initServiceSubscriber;
+    }
 
-    /**
-     * @var TypedTemplateRendererInterface[]
-     */
-    private array $extraRenderers = [];
-
-    /**
-     * @param array<class-string> $extraRenderers
-     */
     public function __construct(
         private readonly string $_document_root,
-        private readonly HtmlRenderer $htmlRenderer,
-        private readonly PhpRenderer $phpRenderer,
-        private readonly TwigRenderer $twigRenderer,
-        private readonly ServiceInstanciator $serviceInstanciator,
-        array $extraRenderers = [],
+        ContainerInterface $container,
     ) {
-        foreach ($extraRenderers as $extraRenderer) {
-            if (class_exists($extraRenderer)) {
-                $renderer = $this->serviceInstanciator->instanciate(new Service($extraRenderer));
+        $this->initServiceSubscriber($container);
+    }
 
-                if (!$renderer instanceof TypedTemplateRendererInterface) {
-                    throw new \InvalidArgumentException(sprintf('Renderer "%s" must implement "%s"', $extraRenderer, TypedTemplateRendererInterface::class));
-                }
-
-                $this->extraRenderers[] = $renderer;
-            }
-        }
-
-        $this->registerRenderers($this->htmlRenderer, $this->phpRenderer, $this->twigRenderer, ...$this->extraRenderers);
+    public static function getSubscribedServices(TagBuilderInterface $tagBuilder): iterable
+    {
+        yield $tagBuilder->buildFromInterface(TypedTemplateRendererInterface::class, [ServiceTagOption::SERVICE_TARGETED]);
+        yield $tagBuilder->buildFromName(HtmlRenderer::class, [ServiceTagOption::SERVICE_TARGETED, ServiceTagOption::FROM_CLASS]);
+        yield $tagBuilder->buildFromName(PhpRenderer::class, [ServiceTagOption::SERVICE_TARGETED, ServiceTagOption::FROM_CLASS]);
+        yield $tagBuilder->buildFromName(TwigRenderer::class, [ServiceTagOption::SERVICE_TARGETED, ServiceTagOption::FROM_CLASS]);
     }
 
     public function render(string $templatePath, array $vars = []): string
@@ -68,26 +65,26 @@ class TemplateRenderer implements TemplateRendererInterface
             throw new FileNotFoundException(sprintf('Template "%s" not found', $templatePath));
         }
 
-        foreach ($this->renderers as $extension => $renderer) {
-            if (str_ends_with($templatePath, $extension)) {
-                if (!isset($vars['renderer'])) {
-                    $vars['renderer'] = $renderer;
-                }
-
-                return $renderer->render($fullTemplatePath, $vars);
-            }
+        $rendererServices = $this->provide(['file' => $templatePath]);
+        if (empty($rendererServices)) {
+            throw new ExtensionNotSupported(sprintf('Template extension "%s" not supported.', $templatePath));
         }
 
-        throw new ExtensionNotSupported(sprintf('Template extension "%s" not supported.', $templatePath));
+        /** @var TypedTemplateRendererInterface $renderer */
+        $renderer = $this->serviceStack->get($rendererServices[0]->getClass());
+        if (!isset($vars['renderer'])) {
+            $vars['renderer'] = $renderer;
+        }
+
+        return $renderer->render($fullTemplatePath, $vars);
     }
 
     /**
-     * @param TypedTemplateRendererInterface $renderers
+     * @param Service<TypedTemplateRendererInterface> $service
+     * @param array{file: string} $ctx
      */
-    public function registerRenderers(...$renderers): void
+    protected function pick(mixed $service, array $ctx): bool
     {
-        foreach ($renderers as $renderer) {
-            $this->renderers[$renderer->getExtension()] = $renderer;
-        }
+        return str_ends_with($ctx['file'], $service->getClass()::getExtension());
     }
 }

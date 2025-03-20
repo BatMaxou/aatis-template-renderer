@@ -4,5 +4,5 @@ namespace Aatis\TemplateRenderer\Interface;
 
 interface TypedTemplateRendererInterface extends TemplateRendererInterface
 {
-    public function getExtension(): string;
+    public static function getExtension(): string;
 }

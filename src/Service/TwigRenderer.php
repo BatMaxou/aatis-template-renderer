@@ -2,13 +2,12 @@
 
 namespace Aatis\TemplateRenderer\Service;
 
-use Aatis\TemplateRenderer\Enum\TemplateFileExtensionEnum;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 class TwigRenderer extends AbstractTemplateRenderer
 {
-    public const EXTENSION = TemplateFileExtensionEnum::TWIG;
+    protected const EXTENSION = '.html.twig';
 
     private string $twigEnvironmentPath;
 
